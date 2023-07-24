@@ -1,0 +1,47 @@
+version: "3.2"
+
+services:
+  # MySQL Container
+  mariadb:
+    image: mysql:latest
+    container_name: glpi_db
+    hostname: glpi_db
+    volumes:
+      - glpi_db:/var/lib/mysql
+    networks:
+      - glpi_network
+    env_file:
+      - ./glpi_db.env
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+    restart: always
+
+  # GLPI Container
+  glpi:
+    image: diouxx/glpi
+    container_name: glpi
+    hostname: glpi
+    ports:
+      - "80:80"
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+      - glpi:/var/www/html/glpi
+    networks:
+      - glpi_network
+    environment:
+      - TIMEZONE=America/Sao_Paulo
+    deploy:
+      placement:
+        constraints: [node.role == worker]
+    restart: always
+
+networks:
+  glpi_network:
+
+volumes:
+  glpi_db:
+  glpi:
+
+
